@@ -1,252 +1,653 @@
-# Screen Requirements Skill
+# Flow-First Prototyping
 
-A Claude Code skill that turns a product idea into structured specification artifacts for agentic prototyping. Run one command at a time, or sprint through the whole chain in five steps. Hand off directly to UI generation tools like v0, Lovable, Bolt, Claude Design, or Google Stitch.
+Flow-First Prototyping is a Codex skill for rapid product prototyping. Its goal is to quickly move from an idea, PRD, rough notes, or existing UX artifacts to a visualized product concept that can be reviewed, generated, and iterated on.
 
----
+Instead of starting with a static screen list, the skill starts with people, goals, and behavior. It builds actors, journeys, small user stories, flows, state models, screen inventories, screen specifications, and UI-generation prompts from the way users actually move through a product.
 
-## What it does
+All generated artifacts are written to:
 
-This skill gives Claude Code a set of `spec.*` commands that walk you from a raw idea through personas, journeys, flows, and screen specifications — producing a folder of markdown files that a UI generation agent can work from.
-
-Each command does one job, pauses for review, and stops. You stay in control of every step.
-
-```
-spec.brief → spec.personas → spec.journeys → spec.flows →
-spec.states → spec.design → spec.map → spec.screens → spec.prepare
+```text
+./docs/ux-ui/
 ```
 
-Or run the whole thing in one shot:
+You can start from almost nothing, from a polished PRD, or from artifacts that already exist. Paste notes into the conversation, point to files, upload source material, or ask the skill to infer from what is already in `docs/ux-ui/`.
 
+## Why This Exists
+
+Most early prototypes jump too quickly to screens. That can make a product look plausible before the core behavior is understood. This skill is designed to create just enough structure before screen generation so visual prototypes have a coherent reason to exist.
+
+The workflow helps answer:
+
+- Who is using the product?
+- What are they trying to accomplish?
+- What journey are they in before, during, and after app use?
+- What small stories make up that journey?
+- What exact flows, states, failures, and recovery paths exist?
+- Which screens are actually needed?
+- What should a UI generation agent render?
+- Where are the continuity gaps before design or engineering spend more time?
+
+The result is a prototype artifact set that can feed visual generation tools, design review, product iteration, or engineering handoff.
+
+## How It Evolves an Idea
+
+The skill turns an idea into UI-generation material through a flow-first chain:
+
+```text
+idea / PRD / existing artifacts
+  -> brief
+  -> actors
+  -> journeys
+  -> small stories
+  -> app outline
+  -> flows
+  -> object states
+  -> design context
+  -> screen inventory and sitemap
+  -> screen specifications
+  -> prototype build brief
+  -> UI-agent prompts
+  -> continuity and readiness reviews
 ```
-spec.oneshot
+
+### Actors
+
+Actors are the people, systems, integrations, workers, or services that initiate actions, make decisions, or materially affect the product. Human actors get realistic context. Non-human actors, such as sync workers, provider APIs, agents, or devices, are represented operationally.
+
+### Journeys
+
+Journeys capture the real-world arc: the situation, motivation, before-and-after context, risks, and stages. A journey can remain broad, such as "connect a library" or "recover from playback failure."
+
+### Stories
+
+Stories are intentionally smaller than journeys. A good story has one actor, one trigger, one primary outcome, and usually one screen or one adjacent screen transition. The skill splits large chains such as "browse and start", "connect and index", or "discover and add" into separate prototype-sized stories.
+
+### Flows
+
+Flows define the exact product sequence for each story: entry point, decisions, branches, errors, exit states, and screen transitions. This is where vague intent becomes behavior a prototype can render.
+
+### States
+
+States describe object lifecycles and what actions are allowed, blocked, or hidden in each state. This prevents screens from only showing the happy path.
+
+### Screens
+
+Screens are derived from the flows and states. The skill creates a screen inventory, sitemap, individual screen specs, and a `page-state-design-links.csv` tracker that includes one row for every page and every state.
+
+### UI-Generation Prompts
+
+The skill compiles screen specs into `docs/ux-ui/ui-agent/`. These files are written for UI-generation agents and visual prototyping tools. They describe what each screen must render, which states need distinct frames, what copy is literal, and which transitions must stay coherent.
+
+## Starting Points
+
+You can use the skill in several ways.
+
+### Start From A Rough Idea
+
+Use this when you only have a product concept or a few notes.
+
+```text
+proto.oneshot
 ```
 
----
+Then paste the idea when asked. The skill will infer the artifact chain and mark assumptions as provisional.
 
-## Output structure
+### Start From A PRD Or Existing File
 
-All artifacts land in a `./spec/` folder in your project:
+Use this when you already have a source document.
 
+```text
+proto.oneshot use prd.md
 ```
-spec/
+
+You can point to any available local file or uploaded artifact. The skill reads it as source material and builds the artifact set from it.
+
+### Start From Existing UX/UI Artifacts
+
+Use this when `docs/ux-ui/` already exists or you have prior journeys, stories, flows, screen lists, or design notes.
+
+```text
+proto.oneshot use prd.md and existing docs/ux-ui artifacts
+```
+
+The skill can reuse existing artifacts as source, regenerate them, or update them depending on the command you run.
+
+### Work Step By Step
+
+Use this when you want review checkpoints after each stage.
+
+```text
+proto.brief
+proto.actors
+proto.journeys
+proto.stories
+proto.outline
+proto.flows
+proto.states
+proto.design
+proto.map
+proto.screens
+proto.prepare
+proto.ui
+proto.continuity
+```
+
+This is slower than `proto.oneshot`, but it gives the most control.
+
+### Work In Sprint Mode
+
+Use this when you want grouped checkpoints rather than command-by-command control.
+
+```text
+proto.sprint
+```
+
+Sprint mode runs the prototype chain in five grouped steps:
+
+1. Foundation
+2. User understanding
+3. Structure
+4. Design
+5. Screens, handoff, and continuity
+
+Each step pauses for review before the next step.
+
+### Change An Existing Prototype
+
+Use this when the artifact set already exists and a requirement changes.
+
+```text
+proto.change add QR-code authorization for cloud providers
+```
+
+The skill performs impact analysis first, shows which files need to change, waits for confirmation, and then updates only the affected artifacts.
+
+### Generate One Screen Prompt
+
+Use this when you want a focused prompt for one screen after the screen specs exist.
+
+```text
+proto.generate PG08
+```
+
+This prints a single generation prompt and writes no files.
+
+### Prepare Engineering Handoff
+
+After the prototype has stabilized, generate implementation-facing artifacts.
+
+```text
+proto.contracts
+proto.data
+proto.actions
+proto.review
+```
+
+These add page contracts, data requirements, action specifications, and a readiness review.
+
+## Setup
+
+Install the skill folder under your Codex skills directory:
+
+```text
+~/.codex/skills/flow-first-prototyping/
+```
+
+For a project, add an `AGENTS.md` note like this:
+
+```md
+# Agents
+
+Use the skill at ~/.codex/skills/flow-first-prototyping/SKILL.md
+
+All proto.* commands are available. Read from and write to ./docs/ux-ui/
+```
+
+Then run commands in Codex using the `proto.*` namespace.
+
+## Output Structure
+
+The main generated tree is:
+
+```text
+docs/ux-ui/
   brief.md
   value-proposition.md
   design.md
+  app-outline.md
+  actions.md
   prepare-brief.md
-  patterns.md              (optional — add after first screens)
+  flow-continuity-review.md
+  readiness-review.md
+  patterns.md
 
-  personas/
-    andy-the-app-user.md   (one file per persona)
+  actors/
+    [actor-name].md
     permissions.md
 
   journeys/
     overview.md
-    andy-discovers-the-app.md
+    journey-map.xlsx
+    [actor]-[scenario].md
+
+  stories/
+    overview.md
+    [actor]-[story].md
 
   flows/
-    andy-submits-a-claim.md
+    [actor]-[scenario].md
 
   screens/
     inventory.md
     sitemap.md
-    home-page.md       (one file per screen)
-    claim-page.md
+    contracts.md
+    page-state-design-links.csv
+    [screen-name].md
 
   data/
-    states.md
     requirements.md
+    states.md
+
+  ui-agent/
+    README.md
+    [screen-id]-[screen-name].md
 ```
+
+## Ways To Progress Through The Flow
+
+### 1. One-Shot Prototype
+
+Best when you want speed and can tolerate provisional assumptions.
+
+Use:
+
+```text
+proto.oneshot use prd.md
+```
+
+This runs the full artifact chain in one pass. It is the fastest way to get from idea to visual-generation-ready prompts.
+
+### 2. Sprint Prototype
+
+Best when you want momentum but still need review gates.
+
+Use:
+
+```text
+proto.sprint
+```
+
+This groups the workflow into five checkpoints. It is useful for workshops, early product shaping, or collaborative review.
+
+### 3. Command-By-Command Prototype
+
+Best when the problem is complex, high risk, or still being discovered.
+
+Use the recommended command sequence:
+
+```text
+proto.brief -> proto.actors -> proto.journeys -> proto.stories -> proto.outline -> proto.flows -> proto.states -> proto.design -> proto.map -> proto.screens -> proto.prepare -> proto.ui -> proto.continuity
+```
+
+This gives you maximum control and lets you correct the direction after each artifact.
+
+### 4. Existing Artifact Refresh
+
+Best when you already have prior UX work, generated artifacts, or a `docs/ux-ui/` folder.
+
+Use:
+
+```text
+proto.oneshot use prd.md and existing docs/ux-ui artifacts
+```
+
+or make targeted updates with:
+
+```text
+proto.change [what changed]
+```
+
+This lets the skill use existing artifacts as context instead of starting over from a blank page.
+
+### 5. UI Generation Handoff
+
+Best when the prototype behavior is clear and you want visual output.
+
+Use:
+
+```text
+proto.ui
+```
+
+The skill compiles canonical artifacts into `docs/ux-ui/ui-agent/`, including one file per screen with states, transitions, copy boundaries, mock data, and acceptance criteria.
 
 ## Commands
 
-### Navigation
+### `proto.help`
 
-| Command | What it does |
-|---|---|
-| `spec.help` | Print the full command reference |
-| `spec.status` | Show which artifacts exist and what to run next |
+Prints the command table, recommended flows, behavior matrix, and output root. It writes no files.
 
-### Shortcuts
+### `proto.status`
 
-| Command | What it does |
-|---|---|
-| `spec.oneshot` | Full prototype spec in one pass — no pausing |
-| `spec.sprint` | 5-step condensed flow — pauses between steps |
+Scans `docs/ux-ui/` and reports which artifact groups are present or missing. Use this before continuing work in an existing project.
 
-### Step by step
+Produces:
 
-| Command | Output | Notes |
-|---|---|---|
-| `spec.brief` | `spec/brief.md` | Start here |
-| `spec.value` | `spec/value-proposition.md` | Optional for prototyping |
-| `spec.personas` | `spec/personas/[name].md` | One file per persona, alliterative names |
-| `spec.journeys` | `spec/journeys/[persona]-[scenario].md` | One file per journey |
-| `spec.flows` | `spec/flows/[persona]-[scenario].md` | One file per flow |
-| `spec.states` | `spec/data/states.md` | Run before screens |
-| `spec.design` | `spec/design.md` | Run after flows and states |
-| `spec.map` | `spec/screens/inventory.md` + `spec/screens/sitemap.md` | Screen list and connection map |
-| `spec.screens` | `spec/screens/[screen-name].md` | One file per screen |
-| `spec.prepare` | `spec/prepare-brief.md` | Generation handoff brief |
-
-### Generation and iteration
-
-| Command | What it does |
-|---|---|
-| `spec.generate [screen-name]` | Packages design, screen spec, and brief into a single paste-ready generation prompt |
-| `spec.change [description]` | Analyses impact of a change, confirms, then updates affected files |
-| `spec.patterns` | Builds and maintains a behavioural pattern library (optional) |
-
-### Engineering handoff (after prototype is validated)
-
-| Command | Output |
-|---|---|
-| `spec.contracts` | `spec/screens/contracts.md` |
-| `spec.data` | `spec/data/requirements.md` |
-| `spec.actions` | `spec/actions.md` |
-| `spec.review` | `spec/readiness-review.md` |
-
----
-
-## Usage examples
-
-**Start from a PRD:**
-```
-Read prd.md and run spec.brief
+```text
+stdout status report
 ```
 
-**Start from nothing:**
-```
-spec.brief
-```
-Claude will ask for your idea and draft from scratch.
+### `proto.brief`
 
-**Run the condensed 5-step flow:**
-```
-Read prd.md and run spec.sprint
-```
+Creates the foundation product brief. It captures the product idea, target users, scope, goals, assumptions, and prototype direction.
 
-**Generate a screen prompt for a specific tool:**
-```
-spec.generate map-workspace — target tool: Claude Design
+Produces:
+
+```text
+docs/ux-ui/brief.md
 ```
 
-**Apply a change across the spec:**
-```
-spec.change add offline support for the mob movement screen
-```
+### `proto.value`
 
-**Check where you are:**
-```
-spec.status
-```
+Creates a stakeholder-facing value proposition. Use this when the product framing, promise, or differentiation needs to be explicit before prototyping.
 
----
+Produces:
 
-## How each command works
-
-Every `spec.*` command follows the same pattern:
-
-1. **Asks for input** — existing content, file path, URL, or "nothing" to draft from context
-2. **Validates** — checks what's present, incomplete, or missing
-3. **Drafts or completes** — fills gaps from prior artifacts, marks inferences as assumptions
-4. **Lists assumptions** — flags what was inferred and at what confidence
-5. **Asks about gaps** — asks only about what's genuinely missing
-6. **Outputs and stops** — writes files and waits for your review
-
-If you provide input inline with the command, the input question is skipped automatically:
-```
-Read prd.md and run spec.brief
-spec.design — using Shadcn, Tailwind, dark mode
-spec.personas — nothing
+```text
+docs/ux-ui/value-proposition.md
 ```
 
-Files drafted from context are marked provisional at the top:
-```
-> ⚠️ Provisional — estimated from context, not supplied or validated.
-```
-Supplied documents carry no such notice — the absence of the notice means the content came from you.
+### `proto.design`
 
----
+Creates the cross-screen design context: platform, visual language, navigation model, state treatment, copy rules, accessibility posture, and constraints for generation.
 
-## Screen generation
+Produces:
 
-`spec.generate` packages four files into a single ready-to-paste prompt:
-
-- `spec/design.md` — product feel, platform, and behavioural requirements
-- `spec/screens/[screen-name].md` — this screen's spec
-- `spec/prepare-brief.md` — mock data and product context
-- `spec/screens/sitemap.md` — navigation context (if present)
-- `spec/patterns.md` — pattern constraints (if present)
-
-Supported tools: **v0**, **Lovable**, **Bolt**, **Claude Design**, **Google Stitch**, or any other UI generation tool.
-
-Each screen spec includes:
-- Design intent — purpose, persona, primary job, content priority
-- Decisions on this screen — consequential choices with stakes and reversibility
-- States, actions, and data requirements
-- Critical variants — named rendering modes
-- Layout regions — functional structure without implementation prescription
-- Screen generation prompt — one dense paragraph describing behaviour, not components
-- Acceptance criteria — verifiable by looking at the generated screen
-- Heuristic check — six NNG heuristics evaluated at spec level before generation
-
----
-
-## Recommended prototype path
-
-```
-spec.brief
-spec.personas
-spec.journeys
-spec.flows
-spec.states
-spec.design
-spec.map
-spec.screens
-spec.prepare
+```text
+docs/ux-ui/design.md
 ```
 
-Then for each screen you want to generate:
-```
-spec.generate [screen-name]
-```
+### `proto.actors`
 
-Add `spec.patterns` after your first generated screens to capture what works and what does not.
+Creates actor profiles and permissions. Actors can be human users, non-human workers, provider APIs, devices, services, or agents.
 
----
+Produces:
 
-## Personas
-
-Personas use alliterative names generated automatically from the role — Andy the App User, Rachel the Receptionist, Felix the Field Technician. Names are chosen to feel natural in a design conversation: "what does Andy need here?" works better than "what does Persona 2 need?"
-
-Each persona file covers: composite summary, identity, context of use, technical profile, time and attention, decision authority, workday shape, goals, frustrations, constraints mapped to design implications, jobs performed, and scenarios.
-
----
-
-## Pattern library
-
-`spec.patterns` is optional and skippable. Run it after generating your first screens when you have real feedback — not speculatively upfront.
-
-The pattern library captures behavioural design decisions, not component choices. It grows from what generation tools get right and wrong on your specific product.
-
-```
-spec.patterns                          # start or add from feedback
-spec.patterns add [description]        # add a single pattern
-spec.patterns review                   # cross-check patterns against screen specs
+```text
+docs/ux-ui/actors/[actor-name].md
+docs/ux-ui/actors/permissions.md
 ```
 
----
+### `proto.journeys`
 
-## Iterating on a live spec
+Creates real-world journey arcs for the actors. Journeys describe the user situation, stages, stakes, before/after context, and emotional or operational shifts.
 
-`spec.change` lets you apply a feature addition or change to an existing spec without re-running the whole chain:
+Produces:
 
+```text
+docs/ux-ui/journeys/overview.md
+docs/ux-ui/journeys/[actor]-[scenario].md
+docs/ux-ui/journeys/journey-map.xlsx
 ```
-spec.change add a QR code scan option to the source connection flow
-spec.change new persona: farm owner who reviews weekly reports
-spec.change rename paddock to block throughout
+
+### `proto.stories`
+
+Creates small prototype-sized stories from the journeys. Stories are deliberately split so each one has one actor, one trigger, one primary outcome, and a focused flow/screen concern.
+
+Produces:
+
+```text
+docs/ux-ui/stories/overview.md
+docs/ux-ui/stories/[actor]-[story].md
 ```
 
-It analyses which files are affected, shows you the impact list, waits for confirmation, then updates only the affected files in dependency order. Every changed file gets a change log entry so you can track what was modified and why.
+### `proto.outline`
 
----
+Creates the early app shape. It identifies likely surfaces, navigation hypotheses, feature boundaries, and things that should not become screens.
+
+Produces:
+
+```text
+docs/ux-ui/app-outline.md
+```
+
+### `proto.flows`
+
+Creates exact product flows for the stories. Flows define steps, branches, error paths, exits, and screen transitions.
+
+Produces:
+
+```text
+docs/ux-ui/flows/[actor]-[scenario].md
+```
+
+### `proto.states`
+
+Creates object and system state models. It defines lifecycle states, allowed actions, blocked actions, hidden actions, and recovery conditions.
+
+Produces:
+
+```text
+docs/ux-ui/data/states.md
+```
+
+### `proto.map`
+
+Creates the screen inventory and sitemap from the flows and states. This is where the prototype becomes a set of canonical screens.
+
+Produces:
+
+```text
+docs/ux-ui/screens/inventory.md
+docs/ux-ui/screens/sitemap.md
+```
+
+### `proto.screens`
+
+Creates one screen specification per in-scope screen. Each spec defines purpose, actors, decisions, states, actions, transitions, interaction states, robustness requirements, copy, and a generation prompt.
+
+Also creates a Figma/design tracker with one row per page and one row per sub-state.
+
+Produces:
+
+```text
+docs/ux-ui/screens/[screen-name].md
+docs/ux-ui/screens/page-state-design-links.csv
+```
+
+### `proto.prepare`
+
+Creates a self-contained prototype build brief for visual generation tools. It summarizes the product, screens, flows, mock data, states, edge cases, and implementation boundaries.
+
+Produces:
+
+```text
+docs/ux-ui/prepare-brief.md
+```
+
+### `proto.ui`
+
+Compiles the canonical artifacts into UI-agent handoff files. These are designed to be handed to a UI generation agent or visual prototyping tool.
+
+Produces:
+
+```text
+docs/ux-ui/ui-agent/README.md
+docs/ux-ui/ui-agent/[screen-id]-[screen-name].md
+```
+
+### `proto.continuity`
+
+Checks whether journeys, stories, flows, sitemap, screens, and UI-agent handoff agree with one another. Use it before generating visuals or after generation feedback.
+
+Produces:
+
+```text
+docs/ux-ui/flow-continuity-review.md
+```
+
+### `proto.generate`
+
+Prints one focused screen-generation prompt. It does not write files.
+
+Produces:
+
+```text
+stdout prompt only
+```
+
+### `proto.change`
+
+Ingests a change request and updates affected artifacts. It first performs impact analysis, lists the files to update, and waits for confirmation before writing.
+
+Produces:
+
+```text
+targeted updates to affected docs/ux-ui files
+```
+
+### `proto.patterns`
+
+Creates or updates a behavioral pattern library after screen generation or feedback. Use it to capture recurring interaction decisions and anti-patterns.
+
+Produces:
+
+```text
+docs/ux-ui/patterns.md
+```
+
+### `proto.contracts`
+
+Creates implementation-facing page contracts from the screen inventory and state model.
+
+Produces:
+
+```text
+docs/ux-ui/screens/contracts.md
+```
+
+### `proto.data`
+
+Creates data requirements for decisions, screens, shared objects, loading states, missing data behavior, and offline/degraded behavior.
+
+Produces:
+
+```text
+docs/ux-ui/data/requirements.md
+```
+
+### `proto.actions`
+
+Creates detailed action specifications. Each action gets intent, preconditions, permissions, validation, result, state transition, destination, feedback, undo, and analytics guidance.
+
+Produces:
+
+```text
+docs/ux-ui/actions.md
+```
+
+### `proto.review`
+
+Creates a readiness review across the prototype and engineering handoff artifacts. Use it before committing to implementation or a heavier visual design pass.
+
+Produces:
+
+```text
+docs/ux-ui/readiness-review.md
+```
+
+### `proto.sprint`
+
+Runs the prototype flow in five reviewable groups:
+
+1. Foundation
+2. User understanding
+3. Structure
+4. Design
+5. Screens, handoff, and continuity
+
+Produces the same core prototype artifacts as the command-by-command path, but with fewer pauses.
+
+### `proto.oneshot`
+
+Runs the full prototype artifact chain in one pass from a single input. Use it for the fastest route from idea or PRD to UI-generation-ready artifacts.
+
+Produces:
+
+```text
+docs/ux-ui/brief.md
+docs/ux-ui/actors/*
+docs/ux-ui/journeys/*
+docs/ux-ui/stories/*
+docs/ux-ui/app-outline.md
+docs/ux-ui/flows/*
+docs/ux-ui/data/states.md
+docs/ux-ui/design.md
+docs/ux-ui/screens/*
+docs/ux-ui/prepare-brief.md
+docs/ux-ui/ui-agent/*
+docs/ux-ui/flow-continuity-review.md
+```
+
+## Recommended Command Sequences
+
+### Fastest
+
+```text
+proto.oneshot use prd.md
+proto.continuity
+proto.ui
+```
+
+### Workshop
+
+```text
+proto.sprint
+proto.continuity
+proto.generate [screen]
+```
+
+### Controlled
+
+```text
+proto.brief
+proto.actors
+proto.journeys
+proto.stories
+proto.outline
+proto.flows
+proto.states
+proto.design
+proto.map
+proto.screens
+proto.prepare
+proto.ui
+proto.continuity
+```
+
+### After Visual Feedback
+
+```text
+proto.change [feedback or requirement change]
+proto.ui
+proto.continuity
+proto.review
+```
+
+### Engineering Handoff
+
+```text
+proto.contracts
+proto.data
+proto.actions
+proto.review
+```
+
+## Practical Notes
+
+- Existing artifacts are useful. The skill can read `docs/ux-ui/` and use it as context.
+- `nothing` is valid input. The skill will infer from existing artifacts and mark assumptions.
+- One-shot output is intentionally provisional. Review before treating it as authoritative.
+- Keep journeys broad, but keep stories small.
+- Run `proto.continuity` whenever screen flow, sitemap, or UI-generation output feels disconnected.
+- Run `proto.change` for targeted updates instead of regenerating everything when the product direction changes.
