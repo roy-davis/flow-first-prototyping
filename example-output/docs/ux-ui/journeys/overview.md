@@ -1,0 +1,14 @@
+> Provisional: regenerated after updating flow-first-prototyping Story Sizing Rules. Review before treating as authoritative.
+
+# Journey Overview
+
+> File: docs/ux-ui/journeys/overview.md
+
+| Journey file | Journey name | Primary actor | Story file(s) | Flow file(s) | Real-world trigger | Resolved end state |
+| --- | --- | --- | --- | --- | --- | --- |
+| leo-resumes-current-book.md | Leo resumes current book | Leo the Living Room Listener | leo-resumes-current-book.md | leo-resumes-current-book.md | Leo returns to the TV after an interrupted listening session. | Playback resumes at the saved millisecond. |
+| leo-browses-and-starts-book.md | Leo browses and starts book | Leo the Living Room Listener | leo-scans-cached-library.md, leo-reviews-book-detail.md, leo-starts-selected-book.md | leo-scans-cached-library.md, leo-reviews-book-detail.md, leo-starts-selected-book.md | Leo wants a different audiobook or has no current book. | Leo reaches a selected book or playback start path. |
+| leo-recovers-from-source-dropout.md | Leo recovers from source dropout | Leo the Living Room Listener | leo-sees-playback-source-failure.md, leo-retries-failed-source.md | leo-sees-playback-source-failure.md, leo-retries-failed-source.md | Playback stalls or fails because a source cannot stream. | Leo retries or enters source-specific repair with position preserved. |
+| sam-connects-smb-library.md | Sam connects SMB library | Sam the Server Steward | sam-chooses-smb-source.md, sam-validates-smb-connection.md, sam-selects-smb-library-folder.md, sync-worker-indexes-smb-source.md, sam-reviews-discovered-smb-books.md | sam-chooses-smb-source.md, sam-validates-smb-connection.md, sam-selects-smb-library-folder.md, sync-worker-indexes-smb-source.md, sam-reviews-discovered-smb-books.md | The household wants to add a NAS or Windows/Samba audiobook folder. | SMB books are discovered and ready for review. |
+| clara-connects-cloud-library.md | Clara connects cloud library | Clara the Cloud Collector | clara-chooses-cloud-provider.md, clara-authorizes-cloud-provider.md, clara-selects-cloud-library-folder.md, sync-worker-indexes-cloud-source.md, clara-reviews-discovered-cloud-books.md | clara-chooses-cloud-provider.md, clara-authorizes-cloud-provider.md, clara-selects-cloud-library-folder.md, sync-worker-indexes-cloud-source.md, clara-reviews-discovered-cloud-books.md | Clara wants to connect audiobooks stored in a first-class cloud provider. | Cloud books are discovered and ready for review. |
+| leo-discovers-and-adds-book.md | Leo discovers and adds book | Leo the Living Room Listener | leo-reviews-discovered-book.md, leo-adds-book-to-listening-library.md | leo-reviews-discovered-book.md, leo-adds-book-to-listening-library.md | New audiobooks have been discovered from a synced source. | One discovered book is added to the listening library. |

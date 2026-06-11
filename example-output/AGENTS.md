@@ -1,5 +1,5 @@
 # Agents
 
-Use the skill at ~/.codex/skills/product-spec-builder/SKILL.md
+Use the skill at ~/.codex/skills/flow-first-prototyping/SKILL.md
 
-All spec.* commands are available. Read from and write to ./outputs/
+All proto.* commands are available. Read from and write to ./docs/ux-ui/
